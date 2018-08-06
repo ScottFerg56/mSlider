@@ -90,7 +90,7 @@ void Control::Run()
 
 	if (Timer)
 	{
-#if true
+#if false
 		if (Slide->GetDistanceToGo() != 0)
 		{
 			debug.println("Slide Position: ", Slide->GetCurrentPosition());
@@ -107,6 +107,7 @@ void Control::Run()
 
 bool Control::Command(String s)
 {
+	debug.println("Command: ", s);
 	switch (s[0])
 	{
 		case 's':
@@ -161,6 +162,25 @@ bool Control::CommandStepper(String s, ScaledStepper* stepper, const char* name)
 
 	switch (s[1])
 	{
+		case 'v':
+		{
+			if (s.length() >= 3)
+			{
+				float speed = s.substring(2).toFloat();
+				if (speed == 0)
+				{
+					stepper->Stop();
+					break;
+				}
+				float goal = speed > 0 ? 99999 : -99999;
+				if (speed < 0)
+					speed = -speed;
+				stepper->SetMaxSpeed(speed * stepper->GetSpeedLimit() / 100);
+				stepper->MoveTo(goal);
+			}
+		}
+		break;
+
 		case 's':
 		{
 			if (s.length() >= 3)

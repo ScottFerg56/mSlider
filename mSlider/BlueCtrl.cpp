@@ -98,13 +98,18 @@ void BlueCtrl::Run()
 		{
 			char b = ble.read();
 		//	debug.println("BLE char: ", (int)b, HEX);
-			if (BufferIndex < 4)
-				Buffer += b;
-			if (++BufferIndex == 5)
+			if (b == ';' || b == '\n' || b == '\r')
 			{
-				Parent->Command(Buffer);
-				Buffer = "";
-				BufferIndex = 0;
+				if (Buffer.length() > 0)
+				{
+					Parent->Command(Buffer);
+					Buffer = "";
+					BufferIndex = 0;
+				}
+			}
+			else
+			{
+				Buffer += b;
 			}
 		}
 	}
