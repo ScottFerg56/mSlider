@@ -115,12 +115,31 @@ void BlueCtrl::Run()
 	}
 }
 
+bool BlueCtrl::Write(String s)
+{
+	if (!Connected)
+		return false;
+	ble.write(s.c_str());
+	return true;
+}
+
 bool BlueCtrl::Command(String s)
 {
 	switch (s[0])
 	{
-		case 'B':
+		case 'b':
 		{
+			if (s.length() > 2)
+			{
+				switch (s[1])
+				{
+				case 's':
+					{
+						Write(s.substring(2));
+						break;
+					}
+				}
+			}
 			return true;
 		}
 	}

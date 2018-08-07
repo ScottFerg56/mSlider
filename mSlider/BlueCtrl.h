@@ -34,6 +34,7 @@ public:
 	void		Setup();
 	void		Run();
 	bool		Command(String s);
+	bool		Write(String s);
 
 private:
 	void		error(char* err);

@@ -79,6 +79,7 @@ void Control::Run()
 	{
 		debug.println("Slide Reached Goal: ", Slide->GetCurrentPosition());
 		debug.println("..secs: ", Slide->GetLastMoveTime());
+		Parent->Command("bss", Slide->GetCurrentPosition());
 	}
 
 	status = Pan->Run();
@@ -86,20 +87,23 @@ void Control::Run()
 	{
 		debug.println("Pan Reached Goal: ", Pan->GetCurrentPosition());
 		debug.println("..secs: ", Pan->GetLastMoveTime());
+		Parent->Command("bsp", Pan->GetCurrentPosition());
 	}
 
 	if (Timer)
 	{
-#if false
+#if true
 		if (Slide->GetDistanceToGo() != 0)
 		{
-			debug.println("Slide Position: ", Slide->GetCurrentPosition());
-			debug.println("..speed: ", Slide->GetSpeed());
+		//	debug.println("Slide Position: ", Slide->GetCurrentPosition());
+		//	debug.println("..speed: ", Slide->GetSpeed());
+			Parent->Command("bss", Slide->GetCurrentPosition());
 		}
 		if (Pan->GetDistanceToGo() != 0)
 		{
-			debug.println("Pan Position: ", Pan->GetCurrentPosition());
-			debug.println("..speed: ", Pan->GetSpeed());
+		//	debug.println("Pan Position: ", Pan->GetCurrentPosition());
+		//	debug.println("..speed: ", Pan->GetSpeed());
+			Parent->Command("bsp", Pan->GetCurrentPosition());
 		}
 #endif
 	}
