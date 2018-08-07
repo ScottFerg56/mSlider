@@ -98,24 +98,48 @@ void BlueCtrl::Run()
 		{
 			char b = ble.read();
 		//	debug.println("BLE char: ", (int)b, HEX);
-			if (BufferIndex < 4)
-				Buffer += b;
-			if (++BufferIndex == 5)
+			if (b == ';' || b == '\n' || b == '\r')
 			{
-				Parent->Command(Buffer);
-				Buffer = "";
-				BufferIndex = 0;
+				if (Buffer.length() > 0)
+				{
+					Parent->Command(Buffer);
+					Buffer = "";
+					BufferIndex = 0;
+				}
+			}
+			else
+			{
+				Buffer += b;
 			}
 		}
 	}
+}
+
+bool BlueCtrl::Write(String s)
+{
+	if (!Connected)
+		return false;
+	ble.write(s.c_str());
+	return true;
 }
 
 bool BlueCtrl::Command(String s)
 {
 	switch (s[0])
 	{
-		case 'B':
+		case 'b':
 		{
+			if (s.length() > 2)
+			{
+				switch (s[1])
+				{
+				case 's':
+					{
+						Write(s.substring(2));
+						break;
+					}
+				}
+			}
 			return true;
 		}
 	}
