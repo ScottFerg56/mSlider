@@ -79,7 +79,8 @@ void Control::Run()
 	{
 		debug.println("Slide Reached Goal: ", Slide->GetCurrentPosition());
 		debug.println("..secs: ", Slide->GetLastMoveTime());
-		Parent->Command("bss", Slide->GetCurrentPosition());
+		// Bluetooth send slide position
+		Parent->Command("bssp", Slide->GetCurrentPosition());
 	}
 
 	status = Pan->Run();
@@ -87,7 +88,8 @@ void Control::Run()
 	{
 		debug.println("Pan Reached Goal: ", Pan->GetCurrentPosition());
 		debug.println("..secs: ", Pan->GetLastMoveTime());
-		Parent->Command("bsp", Pan->GetCurrentPosition());
+		// Bluetooth send pan position
+		Parent->Command("bspp", Pan->GetCurrentPosition());
 	}
 
 	if (Timer)
@@ -97,13 +99,15 @@ void Control::Run()
 		{
 		//	debug.println("Slide Position: ", Slide->GetCurrentPosition());
 		//	debug.println("..speed: ", Slide->GetSpeed());
-			Parent->Command("bss", Slide->GetCurrentPosition());
+			// Bluetooth send slide position
+			Parent->Command("bssp", Slide->GetCurrentPosition());
 		}
 		if (Pan->GetDistanceToGo() != 0)
 		{
 		//	debug.println("Pan Position: ", Pan->GetCurrentPosition());
 		//	debug.println("..speed: ", Pan->GetSpeed());
-			Parent->Command("bsp", Pan->GetCurrentPosition());
+			// Bluetooth send pan position
+			Parent->Command("bspp", Pan->GetCurrentPosition());
 		}
 #endif
 	}
@@ -168,6 +172,8 @@ bool Control::CommandStepper(String s, ScaledStepper* stepper, const char* name)
 	{
 		case 'v':
 		{
+			// Velocity
+			// set the speed, with direction + or -
 			if (s.length() >= 3)
 			{
 				float speed = s.substring(2).toFloat();
@@ -187,6 +193,8 @@ bool Control::CommandStepper(String s, ScaledStepper* stepper, const char* name)
 
 		case 's':
 		{
+			// maxSpeed
+			// Set the maximum speed for moves
 			if (s.length() >= 3)
 			{
 				float speed = s.substring(2).toFloat();
@@ -197,6 +205,8 @@ bool Control::CommandStepper(String s, ScaledStepper* stepper, const char* name)
 
 		case 't':
 		{
+			// Timing
+			// Set the microseconds per step
 			if (s.length() >= 3)
 			{
 				int us = s.substring(2).toInt();
@@ -207,6 +217,8 @@ bool Control::CommandStepper(String s, ScaledStepper* stepper, const char* name)
 
 		case 'a':
 		{
+			// Acceleration
+			// Set the acceleration used for moves
 			if (s.length() >= 3)
 			{
 				float accel = s.substring(2).toFloat();
@@ -217,6 +229,9 @@ bool Control::CommandStepper(String s, ScaledStepper* stepper, const char* name)
 
 		case 'w':
 		{
+			// timed move
+			// Move a specified distance (+/-) in a number of seconds, given two
+			// comma-separated values.
 			if (s.length() >= 3)
 			{
 				int i = s.indexOf(',');
@@ -235,8 +250,31 @@ bool Control::CommandStepper(String s, ScaledStepper* stepper, const char* name)
 		}
 		break;
 
+		case 'p':
+		{
+			// Position
+			// Move to a position
+			if (s.length() >= 3)
+			{
+				if (s[2] == '?')
+				{
+					// respond to query for the position
+					// Bluetooth send slide/pan position
+					Parent->Command(String("bs") + s[0] + 'p', stepper->GetCurrentPosition());
+				}
+				else
+				{
+					int position = s.substring(2).toFloat();
+					stepper->MoveTo(position);
+				}
+			}
+		}
+		break;
+
 		default:
 		{
+			// Position
+			// Shortcut for 'Move to a position' not requiring the 'p' property qualifier
 			int position = s.substring(1).toFloat();
 			stepper->MoveTo(position);
 		}
