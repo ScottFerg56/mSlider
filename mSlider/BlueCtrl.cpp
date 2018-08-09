@@ -135,7 +135,7 @@ bool BlueCtrl::Command(String s)
 				{
 				case 's':
 					{
-						Write(s.substring(2));
+						Write(s.substring(2) + ";");
 						break;
 					}
 				}

@@ -68,7 +68,13 @@ void Control::Run()
 		if (SlideLimit && Slide->GetDistanceToGo() < 0.0)
 		{
 			Slide->SetZero();
+			Parent->Command("bssp", 0);
 			Slide->SetLimits(0, 640);
+			if (!Homed)
+			{
+				Homed = true;
+				Parent->Command("bssh1");
+			}
 			debug.println("Slide Hit Limit: ", Slide->GetCurrentPosition());
 			debug.println("..secs: ", Slide->GetLastMoveTime());
 		}
@@ -161,19 +167,10 @@ bool Control::Command(String s)
 
 bool Control::CommandStepper(String s, ScaledStepper* stepper, const char* name)
 {
-	if (s.length() < 2)
-	{
-		stepper->SetZero();
-		debug.println(name, ": Set Zero");
-		return true;
-	}
-
 	switch (s[1])
 	{
-		case 'v':
+		case 'v':	// Velocity -- Set the speed, with direction + or -
 		{
-			// Velocity
-			// set the speed, with direction + or -
 			if (s.length() >= 3)
 			{
 				float speed = s.substring(2).toFloat();
@@ -191,10 +188,8 @@ bool Control::CommandStepper(String s, ScaledStepper* stepper, const char* name)
 		}
 		break;
 
-		case 's':
+		case 's':	// maxSpeed -- Set the maximum speed for moves
 		{
-			// maxSpeed
-			// Set the maximum speed for moves
 			if (s.length() >= 3)
 			{
 				float speed = s.substring(2).toFloat();
@@ -203,10 +198,8 @@ bool Control::CommandStepper(String s, ScaledStepper* stepper, const char* name)
 		}
 		break;
 
-		case 't':
+		case 't':	// Timing -- Set the microseconds per step
 		{
-			// Timing
-			// Set the microseconds per step
 			if (s.length() >= 3)
 			{
 				int us = s.substring(2).toInt();
@@ -215,10 +208,8 @@ bool Control::CommandStepper(String s, ScaledStepper* stepper, const char* name)
 		}
 		break;
 
-		case 'a':
+		case 'a':	// Acceleration -- Set the acceleration used for moves
 		{
-			// Acceleration
-			// Set the acceleration used for moves
 			if (s.length() >= 3)
 			{
 				float accel = s.substring(2).toFloat();
@@ -227,9 +218,8 @@ bool Control::CommandStepper(String s, ScaledStepper* stepper, const char* name)
 		}
 		break;
 
-		case 'w':
+		case 'w':	// timed move -- To a distance over a duration
 		{
-			// timed move
 			// Move a specified distance (+/-) in a number of seconds, given two
 			// comma-separated values.
 			if (s.length() >= 3)
@@ -250,10 +240,8 @@ bool Control::CommandStepper(String s, ScaledStepper* stepper, const char* name)
 		}
 		break;
 
-		case 'p':
+		case 'p':	// Position -- Move to a position
 		{
-			// Position
-			// Move to a position
 			if (s.length() >= 3)
 			{
 				if (s[2] == '?')
@@ -271,9 +259,35 @@ bool Control::CommandStepper(String s, ScaledStepper* stepper, const char* name)
 		}
 		break;
 
-		default:
+		case 'h':	// Home - Get Homed state or request homing operation
+			if (s[0] == 's')	// only valid for slide
+			{
+				if (s.length() >= 3 && s[2] == '?')
+				{
+					Parent->Command(Homed ? "bssh1" : "bssh0");
+				}
+				else
+				{
+					Homed = false;
+					Parent->Command("bssh0");
+					// start moving toward limit switch to initialize home position
+					stepper->MoveTo(-700);
+				}
+			}
+			break;
+
+		case 'z':	// Zero -- 
+			if (s[0] == 'p')	// only valid for pan
+			{
+				stepper->SetZero();
+				Parent->Command("bspp", 0);
+				debug.println(name, ": Set Zero");
+				return true;
+			}
+			break;
+
+		default:	// Position -- Shortcut
 		{
-			// Position
 			// Shortcut for 'Move to a position' not requiring the 'p' property qualifier
 			int position = s.substring(1).toFloat();
 			stepper->MoveTo(position);

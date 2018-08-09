@@ -25,7 +25,7 @@ An applet for controlling the stepper motors for the camera slider/panner.
 class Control : public Applet
 {
 public:
-	Control() : Timer(500), SlideLimit(false) { }
+	Control() : Timer(500), SlideLimit(false), Homed(false) { }
 	enum		SlideDirection { Stop, Out, In };
 	void		Setup();
 	void		Run();
@@ -36,6 +36,7 @@ protected:
 
 	ScaledStepper* Slide;			// stepper for Slide control
 	bool		SlideLimit;			// slide limit switch is active/closed
+	bool		Homed;				// slide limit has been reached at least once
 
 	ScaledStepper* Pan;				// stepper for Pan control
 
