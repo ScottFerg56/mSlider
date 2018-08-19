@@ -42,6 +42,8 @@ Control	control;
 void Control::Setup()
 {
 	pinMode(SlideLimitPin, INPUT_PULLUP);
+	pinMode(FocusPin, INPUT);
+	pinMode(ShutterPin, INPUT);
 	Slide = new ScaledStepper(new AccelStepper(AccelStepper::DRIVER, SlideStepPin, SlideDirPin), 80.0);
 	Slide->Stepper->setPinsInverted(true);
 	Slide->SetSpeedLimit(50);
@@ -68,7 +70,13 @@ void Control::Run()
 		if (SlideLimit && Slide->GetDistanceToGo() < 0.0)
 		{
 			Slide->SetZero();
+			Parent->Command("bssp", 0);
 			Slide->SetLimits(0, 640);
+			if (!Homed)
+			{
+				Homed = true;
+				Parent->Command("bssh1");
+			}
 			debug.println("Slide Hit Limit: ", Slide->GetCurrentPosition());
 			debug.println("..secs: ", Slide->GetLastMoveTime());
 		}
@@ -79,7 +87,8 @@ void Control::Run()
 	{
 		debug.println("Slide Reached Goal: ", Slide->GetCurrentPosition());
 		debug.println("..secs: ", Slide->GetLastMoveTime());
-		Parent->Command("bss", Slide->GetCurrentPosition());
+		// Bluetooth send slide position
+		Parent->Command("bssp", Slide->GetCurrentPosition());
 	}
 
 	status = Pan->Run();
@@ -87,7 +96,8 @@ void Control::Run()
 	{
 		debug.println("Pan Reached Goal: ", Pan->GetCurrentPosition());
 		debug.println("..secs: ", Pan->GetLastMoveTime());
-		Parent->Command("bsp", Pan->GetCurrentPosition());
+		// Bluetooth send pan position
+		Parent->Command("bspp", Pan->GetCurrentPosition());
 	}
 
 	if (Timer)
@@ -97,27 +107,90 @@ void Control::Run()
 		{
 		//	debug.println("Slide Position: ", Slide->GetCurrentPosition());
 		//	debug.println("..speed: ", Slide->GetSpeed());
-			Parent->Command("bss", Slide->GetCurrentPosition());
+			// Bluetooth send slide position
+			Parent->Command("bssp", Slide->GetCurrentPosition());
 		}
 		if (Pan->GetDistanceToGo() != 0)
 		{
 		//	debug.println("Pan Position: ", Pan->GetCurrentPosition());
 		//	debug.println("..speed: ", Pan->GetSpeed());
-			Parent->Command("bsp", Pan->GetCurrentPosition());
+			// Bluetooth send pan position
+			Parent->Command("bspp", Pan->GetCurrentPosition());
 		}
 #endif
+	}
+
+	switch (ShutterAction)
+	{
+	case Control::Idle:
+		break;
+	case Control::Init:
+		{
+			uint32_t ms = millis();
+			// set focus and shutter pins as outputs and delay for them to set up
+			debug.println("Camera Init: ", ms);
+			pinMode(FocusPin, OUTPUT);
+			pinMode(ShutterPin, OUTPUT);
+			digitalWrite(FocusPin, HIGH);
+			digitalWrite(ShutterPin, HIGH);
+			ShutterTime = ms + 20;
+			ShutterAction = Focus;	// next action
+		}
+		break;
+	case Control::Focus:
+		{
+			uint32_t ms = millis();
+			if (ms >= ShutterTime)
+			{
+				debug.println("Camera Focus: ", ms);
+				// ground focus pin to activate and delay for camera to do the focus
+				digitalWrite(FocusPin, 0);
+				ShutterTime = ms + FocusDelay;
+				ShutterAction = Shutter;	// next action
+			}
+		}
+		break;
+	case Control::Shutter:
+		{
+			uint32_t ms = millis();
+			if (ms >= ShutterTime)
+			{
+				debug.println("Camera Shutter: ", ms);
+				// ground shutter pin to activate and delay for camera action
+				digitalWrite(ShutterPin, 0);
+				ShutterTime = ms + 50;
+				ShutterAction = Done;	// next action
+			}
+		}
+		break;
+	case Control::Done:
+		{
+			uint32_t ms = millis();
+			if (ms >= ShutterTime)
+			{
+				debug.println("Camera Done: ", ms);
+				pinMode(FocusPin, INPUT);
+				pinMode(ShutterPin, INPUT);
+				ShutterAction = Idle;	// next action
+			}
+		}
+		break;
+	default:
+		break;
 	}
 }
 
 bool Control::Command(String s)
 {
-	debug.println("Command: ", s);
 	switch (s[0])
 	{
-		case 's':
+		case 'c':	// CAMERA
+			return CommandCamera(s);
+
+		case 's':	// SLIDE
 			return CommandStepper(s, Slide, "Slide");
 
-		case 'p':
+		case 'p':	// PAN
 			return CommandStepper(s, Pan, "Pan");
 
 		case '!':
@@ -158,15 +231,12 @@ bool Control::Command(String s)
 bool Control::CommandStepper(String s, ScaledStepper* stepper, const char* name)
 {
 	if (s.length() < 2)
-	{
-		stepper->SetZero();
-		debug.println(name, ": Set Zero");
 		return true;
-	}
 
+	debug.println("Control: ", s);
 	switch (s[1])
 	{
-		case 'v':
+		case 'v':	// Velocity -- Set the speed, with direction + or -
 		{
 			if (s.length() >= 3)
 			{
@@ -185,7 +255,7 @@ bool Control::CommandStepper(String s, ScaledStepper* stepper, const char* name)
 		}
 		break;
 
-		case 's':
+		case 's':	// maxSpeed -- Set the maximum speed for moves
 		{
 			if (s.length() >= 3)
 			{
@@ -195,7 +265,7 @@ bool Control::CommandStepper(String s, ScaledStepper* stepper, const char* name)
 		}
 		break;
 
-		case 't':
+		case 't':	// Timing -- Set the microseconds per step
 		{
 			if (s.length() >= 3)
 			{
@@ -205,7 +275,7 @@ bool Control::CommandStepper(String s, ScaledStepper* stepper, const char* name)
 		}
 		break;
 
-		case 'a':
+		case 'a':	// Acceleration -- Set the acceleration used for moves
 		{
 			if (s.length() >= 3)
 			{
@@ -215,8 +285,10 @@ bool Control::CommandStepper(String s, ScaledStepper* stepper, const char* name)
 		}
 		break;
 
-		case 'w':
+		case 'w':	// timed move -- To a distance over a duration
 		{
+			// Move a specified distance (+/-) in a number of seconds, given two
+			// comma-separated values.
 			if (s.length() >= 3)
 			{
 				int i = s.indexOf(',');
@@ -235,8 +307,55 @@ bool Control::CommandStepper(String s, ScaledStepper* stepper, const char* name)
 		}
 		break;
 
-		default:
+		case 'p':	// Position -- Move to a position
 		{
+			if (s.length() >= 3)
+			{
+				if (s[2] == '?')
+				{
+					// respond to query for the position
+					// Bluetooth send slide/pan position
+					Parent->Command(String("bs") + s[0] + 'p', stepper->GetCurrentPosition());
+				}
+				else
+				{
+					int position = s.substring(2).toFloat();
+					stepper->MoveTo(position);
+				}
+			}
+		}
+		break;
+
+		case 'h':	// Home - Get Homed state or request homing operation
+			if (s[0] == 's')	// only valid for slide
+			{
+				if (s.length() >= 3 && s[2] == '?')
+				{
+					Parent->Command(Homed ? "bssh1" : "bssh0");
+				}
+				else
+				{
+					Homed = false;
+					Parent->Command("bssh0");
+					// start moving toward limit switch to initialize home position
+					stepper->MoveTo(-700);
+				}
+			}
+			break;
+
+		case 'z':	// Zero -- 
+			if (s[0] == 'p')	// only valid for pan
+			{
+				stepper->SetZero();
+				Parent->Command("bspp", 0);
+				debug.println(name, ": Set Zero");
+				return true;
+			}
+			break;
+
+		default:	// Position -- Shortcut
+		{
+			// Shortcut for 'Move to a position' not requiring the 'p' property qualifier
 			int position = s.substring(1).toFloat();
 			stepper->MoveTo(position);
 		}
@@ -248,5 +367,30 @@ bool Control::CommandStepper(String s, ScaledStepper* stepper, const char* name)
 	debug.println("..Speed Limit: ", stepper->GetSpeedLimit());
 	debug.println("..usPerStep: ", stepper->GetMicrosPerStep());
 	debug.println("..Acceleration: ", stepper->GetAcceleration());
+	return true;
+}
+
+bool Control::CommandCamera(String s)
+{
+	if (s.length() < 2)
+		return true;
+
+	debug.println("Camera: ", s);
+	switch (s[1])
+	{
+		case 's':	// Shutter -- trip the shutter
+			ShutterAction = Init;
+		break;
+
+		case 'd':	// Delay -- Set the delay time in ms between focus and shutter release
+		{
+			if (s.length() >= 3)
+			{
+				FocusDelay = s.substring(2).toInt();
+				debug.println("Focus delay: ", FocusDelay);
+			}
+		}
+		break;
+	}
 	return true;
 }

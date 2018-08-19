@@ -29,4 +29,7 @@
 #define PanStepPin		11
 #define PanDirPin		12
 
+#define FocusPin		18
+#define ShutterPin		19
+
 #endif
