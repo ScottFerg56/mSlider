@@ -83,21 +83,45 @@ void Control::Run()
 	}
 
 	ScaledStepper::RunStatus status = Slide->Run();
-	if (status == ScaledStepper::ReachedGoal)
+	if (status != LastSlideStatus)
 	{
-		debug.println("Slide Reached Goal: ", Slide->GetCurrentPosition());
-		debug.println("..secs: ", Slide->GetLastMoveTime());
-		// Bluetooth send slide position
-		Parent->Command("bssp", Slide->GetCurrentPosition());
+		LastSlideStatus = status;
+		if (status == ScaledStepper::ReachedGoal)
+		{
+			debug.println("Slide Reached Goal: ", Slide->GetCurrentPosition());
+			debug.println("..secs: ", Slide->GetLastMoveTime());
+			// Bluetooth send slide position
+			Parent->Command("bssp", Slide->GetCurrentPosition());
+		}
+		else if (status == ScaledStepper::Stopped)
+		{
+			Parent->Command("bssm0");	// send slide moving false
+		}
+		else if (status == ScaledStepper::Moving)
+		{
+			Parent->Command("bssm1");	// send slide moving true
+		}
 	}
 
 	status = Pan->Run();
-	if (status == ScaledStepper::ReachedGoal)
+	if (status != LastPanStatus)
 	{
-		debug.println("Pan Reached Goal: ", Pan->GetCurrentPosition());
-		debug.println("..secs: ", Pan->GetLastMoveTime());
-		// Bluetooth send pan position
-		Parent->Command("bspp", Pan->GetCurrentPosition());
+		LastPanStatus = status;
+		if (status == ScaledStepper::ReachedGoal)
+		{
+			debug.println("Pan Reached Goal: ", Pan->GetCurrentPosition());
+			debug.println("..secs: ", Pan->GetLastMoveTime());
+			// Bluetooth send pan position
+			Parent->Command("bspp", Pan->GetCurrentPosition());
+		}
+		else if (status == ScaledStepper::Stopped)
+		{
+			Parent->Command("bspm0");	// send pan moving false
+		}
+		else if (status == ScaledStepper::Moving)
+		{
+			Parent->Command("bspm1");	// send pan moving true
+		}
 	}
 
 	if (Timer)
@@ -193,35 +217,6 @@ bool Control::Command(String s)
 		case 'p':	// PAN
 			return CommandStepper(s, Pan, "Pan");
 
-		case '!':
-			{
-				if (s.length() != 4)
-					return false;
-				if (s[1] != 'b')
-					return false;
-				bool pressed = s[3] == '1';
-				switch (s[2])
-				{
-				case '1':
-					if (pressed) Pan->MoveTo(0); break;
-				case '2':
-					if (pressed) Slide->MoveTo(0); break;
-				case '3':
-				case '4':
-					break;
-				case '5':	// up
-					if (pressed) Pan->MoveTo(180); else Pan->Stop(); break;
-				case '6':	// down
-					if (pressed) Pan->MoveTo(-180); else Pan->Stop(); break;
-				case '7':	// left
-					if (pressed) Slide->MoveTo(640); else Slide->Stop(); break;
-				case '8':	// right
-					if (pressed) Slide->MoveTo(0); else Slide->Stop(); break;
-				default:
-					return false;
-				}
-			}
-			break;
 		default:
 			return false;
 	}
@@ -325,6 +320,13 @@ bool Control::CommandStepper(String s, ScaledStepper* stepper, const char* name)
 			}
 		}
 		break;
+
+		case 'm':	// Moving - Get moving state
+			if (s.length() >= 3 && s[2] == '?')
+			{
+				Parent->Command(String("bs") + s[0] + 'm', stepper->GetMoving() ? '1' : '0');
+			}
+			break;
 
 		case 'h':	// Home - Get Homed state or request homing operation
 			if (s[0] == 's')	// only valid for slide
