@@ -126,22 +126,33 @@ void Control::Run()
 
 	if (Timer)
 	{
-#if true
 		if (Slide->GetDistanceToGo() != 0)
 		{
-		//	debug.println("Slide Position: ", Slide->GetCurrentPosition());
-		//	debug.println("..speed: ", Slide->GetSpeed());
 			// Bluetooth send slide position
 			Parent->Command("bssp", Slide->GetCurrentPosition());
 		}
 		if (Pan->GetDistanceToGo() != 0)
 		{
-		//	debug.println("Pan Position: ", Pan->GetCurrentPosition());
-		//	debug.println("..speed: ", Pan->GetSpeed());
 			// Bluetooth send pan position
 			Parent->Command("bspp", Pan->GetCurrentPosition());
 		}
-#endif
+
+		float speed = Slide->GetSpeed();
+		if (speed != LastSlideSpeed)
+		{
+			LastSlideSpeed = speed;
+			// Bluetooth send slide speed
+			Parent->Command("bsss", speed);
+		}
+
+		speed = Pan->GetSpeed();
+		if (speed != LastSlideSpeed)
+		{
+			LastPanSpeed = speed;
+			// Bluetooth send pan speed
+			Parent->Command("bsps", speed);
+		}
+
 	}
 
 	switch (ShutterAction)
@@ -250,12 +261,19 @@ bool Control::CommandStepper(String s, ScaledStepper* stepper, const char* name)
 		}
 		break;
 
-		case 's':	// maxSpeed -- Set the maximum speed for moves
+		case 's':	// Speed -- Set the max speed OR get current speed
 		{
 			if (s.length() >= 3)
 			{
-				float speed = s.substring(2).toFloat();
-				stepper->SetMaxSpeed(speed);
+				if (s[2] == '?')	// Speed - Get current speed
+				{
+					Parent->Command(String("bs") + s[0] + 's', stepper->GetSpeed());
+				}
+				else	// Speed -- Set the maximum speed for moves
+				{
+					float speed = s.substring(2).toFloat();
+					stepper->SetMaxSpeed(speed);
+				}
 			}
 		}
 		break;

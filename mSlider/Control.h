@@ -43,11 +43,13 @@ protected:
 
 	ScaledStepper* Slide;			// stepper for Slide control
 	ScaledStepper::RunStatus LastSlideStatus;
+	float		LastSlideSpeed;
 	bool		SlideLimit;			// slide limit switch is active/closed
 	bool		Homed;				// slide limit has been reached at least once
 
 	ScaledStepper* Pan;				// stepper for Pan control
 	ScaledStepper::RunStatus LastPanStatus;
+	float		LastPanSpeed;
 
 	bool		CommandStepper(String s, ScaledStepper* stepper, const char* name);
 	bool		CommandCamera(String s);
