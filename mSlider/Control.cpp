@@ -130,7 +130,7 @@ void Control::Run()
 		}
 
 		speed = Pan->GetSpeed();
-		if (speed != LastSlideSpeed)
+		if (speed != LastPanSpeed)
 		{
 			LastPanSpeed = speed;
 			// Bluetooth send pan speed
@@ -379,5 +379,5 @@ void Control::SendProp(ScaledStepper* stepper, Properties prop)
 	default:
 		break;
 	}
-	Parent->Command(String("bs") + prefix + prop, v);
+	Parent->Command(String("bs") + prefix + (char)prop, v);
 }
