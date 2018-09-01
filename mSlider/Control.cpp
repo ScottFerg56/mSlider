@@ -70,12 +70,12 @@ void Control::Run()
 		if (SlideLimit && Slide->GetDistanceToGo() < 0.0)
 		{
 			Slide->SetZero();
-			Parent->Command("bssp", 0);
+			SendProp(Slide, Prop_Position);
 			Slide->SetLimits(0, 640);
 			if (!Homed)
 			{
 				Homed = true;
-				Parent->Command("bssh1");
+				SendProp(Slide, Prop_Homed);
 			}
 			debug.println("Slide Hit Limit: ", Slide->GetCurrentPosition());
 			debug.println("..secs: ", Slide->GetLastMoveTime());
@@ -91,15 +91,7 @@ void Control::Run()
 			debug.println("Slide Reached Goal: ", Slide->GetCurrentPosition());
 			debug.println("..secs: ", Slide->GetLastMoveTime());
 			// Bluetooth send slide position
-			Parent->Command("bssp", Slide->GetCurrentPosition());
-		}
-		else if (status == ScaledStepper::Stopped)
-		{
-			Parent->Command("bssm0");	// send slide moving false
-		}
-		else if (status == ScaledStepper::Moving)
-		{
-			Parent->Command("bssm1");	// send slide moving true
+			SendProp(Slide, Prop_Position);
 		}
 	}
 
@@ -112,15 +104,7 @@ void Control::Run()
 			debug.println("Pan Reached Goal: ", Pan->GetCurrentPosition());
 			debug.println("..secs: ", Pan->GetLastMoveTime());
 			// Bluetooth send pan position
-			Parent->Command("bspp", Pan->GetCurrentPosition());
-		}
-		else if (status == ScaledStepper::Stopped)
-		{
-			Parent->Command("bspm0");	// send pan moving false
-		}
-		else if (status == ScaledStepper::Moving)
-		{
-			Parent->Command("bspm1");	// send pan moving true
+			SendProp(Pan, Prop_Position);
 		}
 	}
 
@@ -129,12 +113,12 @@ void Control::Run()
 		if (Slide->GetDistanceToGo() != 0)
 		{
 			// Bluetooth send slide position
-			Parent->Command("bssp", Slide->GetCurrentPosition());
+			SendProp(Slide, Prop_Position);
 		}
 		if (Pan->GetDistanceToGo() != 0)
 		{
 			// Bluetooth send pan position
-			Parent->Command("bspp", Pan->GetCurrentPosition());
+			SendProp(Pan, Prop_Position);
 		}
 
 		float speed = Slide->GetSpeed();
@@ -142,7 +126,7 @@ void Control::Run()
 		{
 			LastSlideSpeed = speed;
 			// Bluetooth send slide speed
-			Parent->Command("bsss", speed);
+			SendProp(Slide, Prop_Speed);
 		}
 
 		speed = Pan->GetSpeed();
@@ -150,7 +134,7 @@ void Control::Run()
 		{
 			LastPanSpeed = speed;
 			// Bluetooth send pan speed
-			Parent->Command("bsps", speed);
+			SendProp(Pan, Prop_Speed);
 		}
 
 	}
@@ -236,157 +220,77 @@ bool Control::Command(String s)
 
 bool Control::CommandStepper(String s, ScaledStepper* stepper, const char* name)
 {
-	if (s.length() < 2)
+	// s[0] == 's' for Slide; 'p' for Pan
+	// s[1] == Property or Action
+	// s[2] == '?' to get property or start of string value to set property
+
+	if (s.length() < 3)
 		return true;
 
 	debug.println("Control: ", s);
+
+	if (s[2] == '?')
+	{
+		SendProp(stepper, (Properties)s[1]);
+		return true;
+	}
+
 	switch (s[1])
 	{
 		case 'v':	// Velocity -- Set the speed, with direction + or -
 		{
-			if (s.length() >= 3)
+			float speed = s.substring(2).toFloat();
+			if (speed == 0)
 			{
-				float speed = s.substring(2).toFloat();
-				if (speed == 0)
-				{
-					stepper->Stop();
-					break;
-				}
-				float goal = speed > 0 ? 99999 : -99999;
-				if (speed < 0)
-					speed = -speed;
-				stepper->SetMaxSpeed(speed * stepper->GetSpeedLimit() / 100);
-				stepper->MoveTo(goal);
+				stepper->Stop();
+				break;
 			}
-		}
-		break;
-
-		case 's':	// Speed -- Set the max speed OR get current speed
-		{
-			if (s.length() >= 3)
-			{
-				if (s[2] == '?')	// Speed - Get current speed
-				{
-					Parent->Command(String("bs") + s[0] + 's', stepper->GetSpeed());
-				}
-				else	// Speed -- Set the maximum speed for moves
-				{
-					float speed = s.substring(2).toFloat();
-					stepper->SetMaxSpeed(speed);
-				}
-			}
+			float goal = speed > 0 ? 99999 : -99999;
+			if (speed < 0)
+				speed = -speed;
+			stepper->SetMaxSpeed(speed * stepper->GetSpeedLimit() / 100);
+			stepper->MoveTo(goal);
 		}
 		break;
 
 		case 't':	// Timing -- Set the microseconds per step
 		{
-			if (s.length() >= 3)
-			{
-				int us = s.substring(2).toInt();
-				stepper->SetMicrosPerStep(us);
-			}
+			int us = s.substring(2).toInt();
+			stepper->SetMicrosPerStep(us);
 		}
 		break;
 
-		case 'a':	// Acceleration -- Set the acceleration used for moves
-		{
-			if (s.length() >= 3)
-			{
-				float accel = s.substring(2).toFloat();
-				stepper->SetAcceleration(accel);
-			}
-		}
-		break;
-
-		case 'w':	// timed move -- To a distance over a duration
+		case 'w':	// Waypoint -- Move to a distance over a duration
 		{
 			// Move a specified distance (+/-) in a number of seconds, given two
 			// comma-separated values.
-			if (s.length() >= 3)
+			int i = s.indexOf(',');
+			if (i >= 0)
 			{
-				int i = s.indexOf(',');
-				if (i >= 0)
-				{
-					float distance = s.substring(2, i).toFloat();
-					float seconds = s.substring(i+1).toFloat();
-					float speed = stepper->MaxSpeedForDistanceAndTime(distance, seconds);
-					debug.println("->distance: ", distance);
-					debug.println("->seconds: ", seconds);
-					debug.println("->speed: ", speed);
-					stepper->SetMaxSpeed(speed);
-					stepper->MoveTo(stepper->GetCurrentPosition() + distance);
-				}
+				float distance = s.substring(2, i).toFloat();
+				float seconds = s.substring(i+1).toFloat();
+				float speed = stepper->MaxSpeedForDistanceAndTime(distance, seconds);
+				debug.println("->distance: ", distance);
+				debug.println("->seconds: ", seconds);
+				debug.println("->speed: ", speed);
+				stepper->SetMaxSpeed(speed);
+				stepper->MoveTo(stepper->GetCurrentPosition() + distance);
 			}
 		}
 		break;
-
-		case 'p':	// Position -- Move to a position
-		{
-			if (s.length() >= 3)
-			{
-				if (s[2] == '?')
-				{
-					// respond to query for the position
-					// Bluetooth send slide/pan position
-					Parent->Command(String("bs") + s[0] + 'p', stepper->GetCurrentPosition());
-				}
-				else
-				{
-					int position = s.substring(2).toFloat();
-					stepper->MoveTo(position);
-				}
-			}
-		}
-		break;
-
-		case 'm':	// Moving - Get moving state
-			if (s.length() >= 3 && s[2] == '?')
-			{
-				Parent->Command(String("bs") + s[0] + 'm', stepper->GetMoving() ? '1' : '0');
-			}
-			break;
-
-		case 'h':	// Home - Get Homed state or request homing operation
-			if (s[0] == 's')	// only valid for slide
-			{
-				if (s.length() >= 3 && s[2] == '?')
-				{
-					Parent->Command(Homed ? "bssh1" : "bssh0");
-				}
-				else
-				{
-					Homed = false;
-					Parent->Command("bssh0");
-					// start moving toward limit switch to initialize home position
-					stepper->MoveTo(-700);
-				}
-			}
-			break;
 
 		case 'z':	// Zero -- 
 			if (s[0] == 'p')	// only valid for pan
 			{
 				stepper->SetZero();
-				Parent->Command("bspp", 0);
-				debug.println(name, ": Set Zero");
-				return true;
+				SendProp(stepper, Prop_Position);
 			}
 			break;
 
-		default:	// Position -- Shortcut
-		{
-			// Shortcut for 'Move to a position' not requiring the 'p' property qualifier
-			int position = s.substring(1).toFloat();
-			stepper->MoveTo(position);
-		}
-		break;
+		default:
+			SetProp(stepper, (Properties)s[1], s.substring(2).toFloat());
+			break;
 	}
-	debug.println(name, ":");
-	debug.println("..Target: ", stepper->GetTargetPosition());
-	debug.println("..Max Speed: ", stepper->GetMaxSpeed());
-	debug.println("..Speed Limit: ", stepper->GetSpeedLimit());
-	debug.println("..usPerStep: ", stepper->GetMicrosPerStep());
-	debug.println("..Acceleration: ", stepper->GetAcceleration());
 	return true;
 }
 
@@ -413,4 +317,67 @@ bool Control::CommandCamera(String s)
 		break;
 	}
 	return true;
+}
+
+void Control::SetProp(ScaledStepper* stepper, Properties prop, float v)
+{
+	switch (prop)
+	{
+	case Prop_Position:
+		stepper->MoveTo(v);
+		break;
+	case Prop_Acceleration:
+		stepper->SetAcceleration(v);
+		break;
+	case Prop_Speed:
+	//	stepper->SetSpeed(v);	// no need to ever actually set Speed
+		break;
+	case Prop_MaxSpeed:
+		stepper->SetMaxSpeed(v);
+		break;
+	case Prop_SpeedLimit:
+		stepper->SetSpeedLimit(v);
+		break;
+	case Prop_Homed:
+		if (v == 0 && stepper == Slide)
+		{
+			Homed = false;
+			SendProp(stepper, Prop_Homed);
+			// start moving toward limit switch to initialize home position
+			stepper->MoveTo(-700);
+		}
+		break;
+	default:
+		break;
+	}
+}
+
+void Control::SendProp(ScaledStepper* stepper, Properties prop)
+{
+	char prefix = stepper == Slide ? 's' : 'p';
+	float v;
+	switch (prop)
+	{
+	case Prop_Position:
+		v = stepper->GetCurrentPosition();
+		break;
+	case Prop_Acceleration:
+		v = stepper->GetAcceleration();
+		break;
+	case Prop_Speed:
+		v = stepper->GetSpeed();
+		break;
+	case Prop_MaxSpeed:
+		v = stepper->GetMaxSpeed();
+		break;
+	case Prop_SpeedLimit:
+		v = stepper->GetSpeedLimit();
+		break;
+	case Prop_Homed:
+		v = Homed ? 1 : 0;
+		break;
+	default:
+		break;
+	}
+	Parent->Command(String("bs") + prefix + prop, v);
 }
