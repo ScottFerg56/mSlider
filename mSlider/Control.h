@@ -25,7 +25,8 @@ An applet for controlling the stepper motors for the camera slider/panner.
 class Control : public Applet
 {
 public:
-	Control() : Timer(500), SlideLimit(false), Homed(false), FocusDelay(500), ShutterAction(Idle) { }
+	Control() : Timer(500), SlideLimit(false), Homed(false), FocusDelay(500), ShutterAction(Idle),
+		LastSlideStatus(ScaledStepper::Stopped), LastPanStatus(ScaledStepper::Stopped) { }
 	enum		SlideDirection { Stop, Out, In };
 	void		Setup();
 	void		Run();
@@ -41,10 +42,14 @@ protected:
 	uint32_t	FocusDelay;			// in ms - delay after focus before tripping shutter
 
 	ScaledStepper* Slide;			// stepper for Slide control
+	ScaledStepper::RunStatus LastSlideStatus;
+	float		LastSlideSpeed;
 	bool		SlideLimit;			// slide limit switch is active/closed
 	bool		Homed;				// slide limit has been reached at least once
 
 	ScaledStepper* Pan;				// stepper for Pan control
+	ScaledStepper::RunStatus LastPanStatus;
+	float		LastPanSpeed;
 
 	bool		CommandStepper(String s, ScaledStepper* stepper, const char* name);
 	bool		CommandCamera(String s);

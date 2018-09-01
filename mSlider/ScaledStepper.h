@@ -48,6 +48,7 @@ public:
 	float		GetLastMoveTime();
 	float		GetDistanceToGo();
 	float		MaxSpeedForDistanceAndTime(float distance, float seconds);
+	bool		GetMoving() { return IsMoving; }
 
 	AccelStepper *Stepper;
 
