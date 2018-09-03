@@ -129,15 +129,17 @@ bool BlueCtrl::Command(String s)
 	{
 		case 'b':
 		{
-			if (s.length() > 2)
+			if (s.length() > 1)
 			{
 				switch (s[1])
 				{
 				case 's':
-					{
+					if (s.length() > 2)
 						Write(s.substring(2) + ";");
-						break;
-					}
+					break;
+				case 'd':
+					ble.disconnect();
+					break;
 				}
 			}
 			return true;
