@@ -25,8 +25,7 @@ An applet for controlling the stepper motors for the camera slider/panner.
 class Control : public Applet
 {
 public:
-	Control() : Timer(500), SlideLimit(false), Homed(false), FocusDelay(500), ShutterAction(Idle),
-		LastSlideStatus(ScaledStepper::Stopped), LastPanStatus(ScaledStepper::Stopped) { }
+	Control() : Timer(500) { }
 	enum		SlideDirection { Stop, Out, In };
 	void		Setup();
 	void		Run();
@@ -38,26 +37,26 @@ protected:
 
 	Metronome	Timer;
 
-	ShutterStatus ShutterAction;	// next shutter action to take
-	uint32_t	ShutterTime;		// in ms - time for next shutter action
-	uint32_t	FocusDelay;			// in ms - delay after focus before tripping shutter
+	int			Action = 0;
 
-	ScaledStepper* Slide;			// stepper for Slide control
-	ScaledStepper::RunStatus LastSlideStatus;
-	float		LastSlideSpeed;
-	bool		SlideLimit;			// slide limit switch is active/closed
-	bool		Homed;				// slide limit has been reached at least once
+	ShutterStatus ShutterAction = Idle;	// next shutter action to take
+	uint32_t	ShutterTime;			// in ms - time for next shutter action
+	uint32_t	FocusDelay = 500;		// in ms - delay after focus before tripping shutter
 
-	ScaledStepper* Pan;				// stepper for Pan control
-	ScaledStepper::RunStatus LastPanStatus;
-	float		LastPanSpeed;
+	ScaledStepper* Slide;				// stepper for Slide control
+	ScaledStepper::RunStatus LastSlideStatus = ScaledStepper::Stopped;
+	float		LastSlideSpeed = 0;
+	bool		SlideLimit = false;		// slide limit switch is active/closed
+	bool		Homed = false;			// slide limit has been reached at least once
+
+	ScaledStepper* Pan;					// stepper for Pan control
+	ScaledStepper::RunStatus LastPanStatus = ScaledStepper::Stopped;
+	float		LastPanSpeed = 0;
 
 	bool		CommandStepper(String s, ScaledStepper* stepper, const char* name);
 	bool		CommandCamera(String s);
 	void		SetProp(ScaledStepper* stepper, Properties prop, float v);
 	void		SendProp(ScaledStepper* stepper, Properties prop);
 };
-
-extern Control control;
 
 #endif

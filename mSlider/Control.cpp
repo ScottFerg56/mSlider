@@ -14,8 +14,6 @@
 
 #include "Control.h"
 
-Control	control;
-
 /*
 	Slide:
 		+direction away from stepper
@@ -136,7 +134,6 @@ void Control::Run()
 			// Bluetooth send pan speed
 			SendProp(Pan, Prop_Speed);
 		}
-
 	}
 
 	switch (ShutterAction)
@@ -203,6 +200,33 @@ bool Control::Command(String s)
 {
 	switch (s[0])
 	{
+		case 'g':	// GLOBAL
+			{
+				if (s.length() < 3)
+					return true;
+
+				switch (s[1])
+				{
+					case 'a':	// Action
+					{
+						// Action is a variable stored and retrieved by the control app
+						// for recovery after disconnection
+						// We don't care about the values
+						if (s[2] == '?')
+						{
+							Parent->Command("bsga", Action);
+						}
+						else
+						{
+							Action = s.substring(2).toInt();
+							debug.println("Action set: ", Action);
+						}
+						break;
+					}
+				}
+			}
+			break;
+
 		case 'c':	// CAMERA
 			return CommandCamera(s);
 
