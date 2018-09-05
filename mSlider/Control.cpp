@@ -184,10 +184,26 @@ void Control::Run()
 			uint32_t ms = millis();
 			if (ms >= ShutterTime)
 			{
-				debug.println("Camera Done: ", ms);
-				pinMode(FocusPin, INPUT);
-				pinMode(ShutterPin, INPUT);
-				ShutterAction = Idle;	// next action
+				if (CamFrames == 0 || --CamFrames == 0)
+				{
+					SendCamProp(Cam_Frames);
+					debug.println("Camera Done: ", ms);
+					pinMode(FocusPin, INPUT);
+					pinMode(ShutterPin, INPUT);
+					ShutterAction = Idle;	// next action
+				}
+				else
+				{
+					SendCamProp(Cam_Frames);
+					debug.println("Camera Frames: ", CamFrames);
+					digitalWrite(FocusPin, HIGH);
+					digitalWrite(ShutterPin, HIGH);
+					if (CamInterval >= FocusDelay + ShutterHold)
+						ShutterTime = ms + CamInterval - (FocusDelay + ShutterHold);
+					else
+						ShutterTime = ms + 20;
+					ShutterAction = Focus;	// next action
+				}
 			}
 		}
 		break;
@@ -423,6 +439,10 @@ void Control::SetCamProp(CamProperties prop, uint v)
 		break;
 	case Cam_Frames:
 		CamFrames = v;
+		if (CamInterval > 0 && CamFrames > 0 && ShutterAction == Idle)
+		{
+			ShutterAction = Init;
+		}
 		break;
 	default:
 		break;

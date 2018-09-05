@@ -13,7 +13,7 @@
 */
 
 /*
-An applet for controlling the stepper motors for the camera slider/panner.
+An applet for controlling the stepper motors and camera shutter for the camera slider/panner.
 */
 
 #ifndef Control_h
@@ -42,7 +42,7 @@ protected:
 
 	ShutterStatus ShutterAction = Idle;	// next shutter action to take
 	uint32_t	ShutterTime;			// in ms - time for next shutter action
-	uint		FocusDelay = 100;		// in ms - delay after focus before tripping shutter
+	uint		FocusDelay = 150;		// in ms - delay after focus before tripping shutter
 	uint		ShutterHold = 50;		// in ms - time to hold shutter signal
 	uint		CamInterval = 0;		// in ms - time between camera frames
 	uint		CamFrames = 0;			// # frames remaining to shoot
