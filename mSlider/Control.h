@@ -34,6 +34,7 @@ public:
 protected:
 	enum ShutterStatus { Idle, Init, Focus, Shutter, Done };
 	enum Properties { Prop_Position = 'p', Prop_Acceleration = 'a', Prop_Speed = 's', Prop_MaxSpeed = 'm', Prop_SpeedLimit = 'l', Prop_Homed = 'h' };
+	enum CamProperties { Cam_FocusDelay = 'd', Cam_ShutterHold = 's', Cam_Interval = 'i', Cam_Frames = 'f' };
 
 	Metronome	Timer;
 
@@ -41,7 +42,10 @@ protected:
 
 	ShutterStatus ShutterAction = Idle;	// next shutter action to take
 	uint32_t	ShutterTime;			// in ms - time for next shutter action
-	uint32_t	FocusDelay = 500;		// in ms - delay after focus before tripping shutter
+	uint		FocusDelay = 100;		// in ms - delay after focus before tripping shutter
+	uint		ShutterHold = 50;		// in ms - time to hold shutter signal
+	uint		CamInterval = 0;		// in ms - time between camera frames
+	uint		CamFrames = 0;			// # frames remaining to shoot
 
 	ScaledStepper* Slide;				// stepper for Slide control
 	ScaledStepper::RunStatus LastSlideStatus = ScaledStepper::Stopped;
@@ -57,6 +61,8 @@ protected:
 	bool		CommandCamera(String s);
 	void		SetProp(ScaledStepper* stepper, Properties prop, float v);
 	void		SendProp(ScaledStepper* stepper, Properties prop);
+	void		SetCamProp(CamProperties prop, uint v);
+	void		SendCamProp(CamProperties prop);
 };
 
 #endif

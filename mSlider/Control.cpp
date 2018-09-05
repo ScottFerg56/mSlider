@@ -214,7 +214,7 @@ bool Control::Command(String s)
 						// We don't care about the values
 						if (s[2] == '?')
 						{
-							Parent->Command("bsga", Action);
+							Parent->Command("bsga", (uint)Action);
 						}
 						else
 						{
@@ -251,7 +251,7 @@ bool Control::CommandStepper(String s, ScaledStepper* stepper, const char* name)
 	if (s.length() < 3)
 		return true;
 
-	debug.println("Control: ", s);
+	debug.println("Stepper: ", s);
 
 	if (s[2] == '?')
 	{
@@ -320,24 +320,25 @@ bool Control::CommandStepper(String s, ScaledStepper* stepper, const char* name)
 
 bool Control::CommandCamera(String s)
 {
-	if (s.length() < 2)
+	// s[0] == 'c' for Camera
+	// s[1] == Property or Action
+	// s[2] == '?' to get property or start of string value to set property
+
+	if (s.length() < 3)
 		return true;
 
 	debug.println("Camera: ", s);
-	switch (s[1])
-	{
-		case 's':	// Shutter -- trip the shutter
-			ShutterAction = Init;
-		break;
 
-		case 'd':	// Delay -- Set the delay time in ms between focus and shutter release
-		{
-			if (s.length() >= 3)
-			{
-				FocusDelay = s.substring(2).toInt();
-				debug.println("Focus delay: ", FocusDelay);
-			}
-		}
+	if (s[2] == '?')
+	{
+		SendCamProp((CamProperties)s[1]);
+		return true;
+	}
+
+	switch ((CamProperties)s[1])
+	{
+	default:
+		SetCamProp((CamProperties)s[1], s.substring(2).toFloat());
 		break;
 	}
 	return true;
@@ -399,6 +400,52 @@ void Control::SendProp(ScaledStepper* stepper, Properties prop)
 		break;
 	case Prop_Homed:
 		v = Homed ? 1 : 0;
+		break;
+	default:
+		break;
+	}
+	Parent->Command(String("bs") + prefix + (char)prop, v);
+}
+
+void Control::SetCamProp(CamProperties prop, uint v)
+{
+//	debug.println((String("--> ") + (char)prop).c_str(), v);
+	switch (prop)
+	{
+	case Cam_FocusDelay:
+		FocusDelay = v;
+		break;
+	case Cam_ShutterHold:
+		ShutterHold = v;
+		break;
+	case Cam_Interval:
+		CamInterval = v;
+		break;
+	case Cam_Frames:
+		CamFrames = v;
+		break;
+	default:
+		break;
+	}
+}
+
+void Control::SendCamProp(CamProperties prop)
+{
+	char prefix = 'c';
+	uint v;
+	switch (prop)
+	{
+	case Cam_FocusDelay:
+		v = FocusDelay;
+		break;
+	case Cam_ShutterHold:
+		v = ShutterHold;
+		break;
+	case Cam_Interval:
+		v = CamInterval;
+		break;
+	case Cam_Frames:
+		v = CamFrames;
 		break;
 	default:
 		break;
