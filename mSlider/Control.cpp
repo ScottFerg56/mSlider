@@ -271,7 +271,7 @@ bool Control::CommandStepper(String s, ScaledStepper* stepper, const char* name)
 
 	if (s[2] == '?')
 	{
-		SendProp(stepper, (Properties)s[1]);
+		SendProp(stepper, (Properties)s[1], s.length() > 3 && s[3] == '?');
 		return true;
 	}
 
@@ -289,6 +289,7 @@ bool Control::CommandStepper(String s, ScaledStepper* stepper, const char* name)
 			if (speed < 0)
 				speed = -speed;
 			stepper->SetMaxSpeed(speed * stepper->GetSpeedLimit() / 100);
+			SendProp(stepper, Prop_MaxSpeed);
 			stepper->MoveTo(goal);
 		}
 		break;
@@ -347,7 +348,7 @@ bool Control::CommandCamera(String s)
 
 	if (s[2] == '?')
 	{
-		SendCamProp((CamProperties)s[1]);
+		SendCamProp((CamProperties)s[1], s.length() > 3 && s[3] == '?');
 		return true;
 	}
 
@@ -393,7 +394,7 @@ void Control::SetProp(ScaledStepper* stepper, Properties prop, float v)
 	}
 }
 
-void Control::SendProp(ScaledStepper* stepper, Properties prop)
+void Control::SendProp(ScaledStepper* stepper, Properties prop, bool echo)
 {
 	char prefix = stepper == Slide ? 's' : 'p';
 	float v;
@@ -417,10 +418,16 @@ void Control::SendProp(ScaledStepper* stepper, Properties prop)
 	case Prop_Homed:
 		v = Homed ? 1 : 0;
 		break;
+	case Prop_TargetPosition:
+		v = stepper->GetTargetPosition();
+		break;
 	default:
 		break;
 	}
-	Parent->Command(String("bs") + prefix + (char)prop, v);
+	if (echo)
+		debug.println((String("bs") + prefix + (char)prop).c_str(), v);
+	else
+		Parent->Command(String("bs") + prefix + (char)prop, v);
 }
 
 void Control::SetCamProp(CamProperties prop, uint v)
@@ -449,7 +456,7 @@ void Control::SetCamProp(CamProperties prop, uint v)
 	}
 }
 
-void Control::SendCamProp(CamProperties prop)
+void Control::SendCamProp(CamProperties prop, bool echo)
 {
 	char prefix = 'c';
 	uint v;
@@ -470,5 +477,8 @@ void Control::SendCamProp(CamProperties prop)
 	default:
 		break;
 	}
-	Parent->Command(String("bs") + prefix + (char)prop, v);
+	if (echo)
+		debug.println((String("bs") + prefix + (char)prop).c_str(), v);
+	else
+		Parent->Command(String("bs") + prefix + (char)prop, v);
 }

@@ -33,7 +33,7 @@ public:
 
 protected:
 	enum ShutterStatus { Idle, Init, Focus, Shutter, Done };
-	enum Properties { Prop_Position = 'p', Prop_Acceleration = 'a', Prop_Speed = 's', Prop_MaxSpeed = 'm', Prop_SpeedLimit = 'l', Prop_Homed = 'h' };
+	enum Properties { Prop_Position = 'p', Prop_Acceleration = 'a', Prop_Speed = 's', Prop_MaxSpeed = 'm', Prop_SpeedLimit = 'l', Prop_Homed = 'h', Prop_TargetPosition = 't' };
 	enum CamProperties { Cam_FocusDelay = 'd', Cam_ShutterHold = 's', Cam_Interval = 'i', Cam_Frames = 'f' };
 
 	Metronome	Timer;
@@ -60,9 +60,9 @@ protected:
 	bool		CommandStepper(String s, ScaledStepper* stepper, const char* name);
 	bool		CommandCamera(String s);
 	void		SetProp(ScaledStepper* stepper, Properties prop, float v);
-	void		SendProp(ScaledStepper* stepper, Properties prop);
+	void		SendProp(ScaledStepper* stepper, Properties prop, bool echo = false);
 	void		SetCamProp(CamProperties prop, uint v);
-	void		SendCamProp(CamProperties prop);
+	void		SendCamProp(CamProperties prop, bool echo = false);
 };
 
 #endif
