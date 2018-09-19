@@ -14,7 +14,7 @@
 
 #include "ScaledStepper.h"
 #include "mSlider.h"
-#include "BlueCtrl.h"
+#include "FMBlue.h"
 #include "Control.h"
 
 App	myApp;

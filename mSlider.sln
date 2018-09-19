@@ -13,12 +13,16 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Metronome", "..\mLibs\Metro
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mSlider", "mSlider\mSlider.vcxproj", "{C5F80730-F44F-4478-BDAE-6634EFC2CA88}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FMBlue", "..\mLibs\FMBlue\FMBlue.vcxitems", "{1D794E95-E48A-4A64-8D73-6D2A688223ED}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		..\mLibs\FMBlue\FMBlue.vcxitems*{1d794e95-e48a-4a64-8d73-6d2a688223ed}*SharedItemsImports = 9
 		..\mLibs\Applet\Applet.vcxitems*{2c7ff0e5-2d2e-49c2-b254-37256e5ac7c4}*SharedItemsImports = 9
 		..\mLibs\Metronome\Metronome.vcxitems*{55c67968-8faa-412c-b3ec-84d600211042}*SharedItemsImports = 9
 		..\mLibs\FMTime\FMTime.vcxitems*{9b8b219c-28d6-4b09-84ef-67be5feee511}*SharedItemsImports = 9
 		..\mLibs\Applet\Applet.vcxitems*{c5f80730-f44f-4478-bdae-6634efc2ca88}*SharedItemsImports = 4
+		..\mLibs\FMBlue\FMBlue.vcxitems*{c5f80730-f44f-4478-bdae-6634efc2ca88}*SharedItemsImports = 4
 		..\mLibs\FMDebug\FMDebug.vcxitems*{c5f80730-f44f-4478-bdae-6634efc2ca88}*SharedItemsImports = 4
 		..\mLibs\FMTime\FMTime.vcxitems*{c5f80730-f44f-4478-bdae-6634efc2ca88}*SharedItemsImports = 4
 		..\mLibs\Metronome\Metronome.vcxitems*{c5f80730-f44f-4478-bdae-6634efc2ca88}*SharedItemsImports = 4

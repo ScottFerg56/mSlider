@@ -24,9 +24,6 @@
     <ClInclude Include="mSlider.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="BlueCtrl.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Control.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -35,9 +32,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="BlueCtrl.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Control.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
