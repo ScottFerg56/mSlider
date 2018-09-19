@@ -25,7 +25,7 @@ void setup()
 	debug.Enabled = false;
 	myApp.AddApplet(&debug);
 	myApp.AddApplet(new Control());
-	myApp.AddApplet(new BlueCtrl());
+	myApp.AddApplet(new BlueCtrl("SLIDER"));
 }
 
 void loop()
