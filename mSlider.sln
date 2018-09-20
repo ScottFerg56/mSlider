@@ -15,6 +15,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mSlider", "mSlider\mSlider.
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FMBlue", "..\mLibs\FMBlue\FMBlue.vcxitems", "{1D794E95-E48A-4A64-8D73-6D2A688223ED}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ScaledStepper", "..\mLibs\ScaledStepper\ScaledStepper.vcxitems", "{F0778FF9-7BB2-4054-BD88-3FA4B19D46CF}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		..\mLibs\FMBlue\FMBlue.vcxitems*{1d794e95-e48a-4a64-8d73-6d2a688223ed}*SharedItemsImports = 9
@@ -26,7 +28,9 @@ Global
 		..\mLibs\FMDebug\FMDebug.vcxitems*{c5f80730-f44f-4478-bdae-6634efc2ca88}*SharedItemsImports = 4
 		..\mLibs\FMTime\FMTime.vcxitems*{c5f80730-f44f-4478-bdae-6634efc2ca88}*SharedItemsImports = 4
 		..\mLibs\Metronome\Metronome.vcxitems*{c5f80730-f44f-4478-bdae-6634efc2ca88}*SharedItemsImports = 4
+		..\mLibs\ScaledStepper\ScaledStepper.vcxitems*{c5f80730-f44f-4478-bdae-6634efc2ca88}*SharedItemsImports = 4
 		..\mLibs\FMDebug\FMDebug.vcxitems*{d5e70b5a-35af-4d51-ba35-5d4700b3d495}*SharedItemsImports = 9
+		..\mLibs\ScaledStepper\ScaledStepper.vcxitems*{f0778ff9-7bb2-4054-bd88-3fa4b19d46cf}*SharedItemsImports = 9
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x86 = Debug|x86
