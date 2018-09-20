@@ -1,4 +1,19 @@
-// ScaledStepper.h
+/*
+
+ @@@@@                    @@@              @@@   @@@@@     @
+@@   @@                    @@               @@  @@   @@   @@
+@@   @@                    @@               @@  @@   @@   @@
+ @@      @@@@@   @@@@      @@    @@@@@    @@@@   @@     @@@@@@   @@@@@  @@ @@@  @@ @@@   @@@@@  @@ @@@
+  @@@   @@   @@     @@     @@   @@   @@  @@ @@    @@@     @@    @@   @@  @@  @@  @@  @@ @@   @@  @@  @@
+	@@  @@       @@@@@     @@   @@@@@@@ @@  @@      @@    @@    @@@@@@@  @@  @@  @@  @@ @@@@@@@  @@  @@
+@@   @@ @@      @@  @@     @@   @@      @@  @@  @@   @@   @@    @@       @@  @@  @@  @@ @@       @@
+@@   @@ @@   @@ @@  @@     @@   @@   @@ @@  @@  @@   @@   @@ @@ @@   @@  @@@@@   @@@@@  @@   @@  @@
+ @@@@@   @@@@@   @@@ @@   @@@@   @@@@@   @@@ @@  @@@@@     @@@   @@@@@   @@      @@      @@@@@  @@@@
+																		 @@      @@
+																		@@@@    @@@@
+
+ Author:	Scott Ferguson
+*/
 
 #ifndef _SCALEDSTEPPER_h
 #define _SCALEDSTEPPER_h
@@ -11,9 +26,17 @@
 
 #include <AccelStepper.h>
 
+/// <summary>An implementation layer on top of AccelStepper to provide scaled units.</summary>
+/// <remarks>
+/// ScaledStepper allows user-friendly logical units to be used with an AccelStepper interface.
+/// See the AccelStepper documentation for additional usage information.
+/// </remarks>
 class ScaledStepper
 {
 public:
+	/// <summary>Construct with an AccelStepper object and scaling factor.</summary>
+	/// <param name="stepper">A pointer to an AccelStepper object controlling the stepper motor.</param>
+	/// <param name="stepsPerUnit">A scaling factor specifying the number of stepper steps per logical unit.</param>
 	ScaledStepper(AccelStepper *stepper, float stepsPerUnit)
 	{
 		Stepper = stepper;
@@ -23,7 +46,13 @@ public:
 		MinLimit = -2000000000L;
 	}
 
-	enum RunStatus { Stopped, ReachedGoal, Moving };
+	/// <summary>Status of stepper movement.</summary>
+	enum RunStatus
+	{
+		Stopped,		// Stepper has stopped
+		ReachedGoal,	// Stepper just reached goal (next status will be Stopped)
+		Moving			// Stepper is still moving
+	};
 
 	RunStatus	Run();
 	void		Stop();
@@ -35,7 +64,6 @@ public:
 	float		GetAcceleration();
 	void		SetAcceleration(float accel);
 	float		GetSpeed();
-	void		SetSpeed(float speed);
 	float		GetMaxSpeed();
 	void		SetMaxSpeed(float speed);
 	void		SetSpeedLimit(float speed);
@@ -48,18 +76,17 @@ public:
 	float		GetLastMoveTime();
 	float		GetDistanceToGo();
 	float		MaxSpeedForDistanceAndTime(float distance, float seconds);
-	bool		GetMoving() { return IsMoving; }
 
-	AccelStepper *Stepper;
+	AccelStepper *Stepper;		// the implementation actually performing stepper movement
 
 protected:
 	float		StepsPerUnit;	// scale factor in steps per unit
 	float		SpeedLimit;		// in units
 	long		MaxLimit;		// in steps
 	long		MinLimit;		// in steps
-	bool		IsMoving;
-	uint32_t	MoveStartTime;	// in us
-	uint32_t	MoveStopTime;	// in us
+	bool		IsMoving;		// record of whether we're trying to move the stepper or not
+	uint32_t	MoveStartTime;	// record of the start time of the last move, in microseconds
+	uint32_t	MoveStopTime;	// record of the stop time of the last move, in microseconds
 	float		Acceleration;	// steps per second per second (not scaled units)
 };
 
