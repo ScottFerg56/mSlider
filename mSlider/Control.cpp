@@ -257,7 +257,7 @@ bool Control::Command(String s)
 						// We don't care about the values
 						if (s[2] == '?')
 						{
-							Parent->Command("bsga", (uint)Action);	// send requested value
+							Parent->Output("ga" + String(Action));	// send requested value
 						}
 						else
 						{
@@ -480,11 +480,11 @@ void Control::SendProp(ScaledStepper* stepper, Properties prop, bool echo)
 		break;
 	}
 	// format and output the value
-	String s = String("bs") + prefix + (char)prop;
+	String s = String(prefix) + (char)prop;
 	if (echo)
 		debug.println(s.c_str(), v);
 	else
-		Parent->Command(s, v);
+		Parent->Output(s + String(v));
 }
 
 /// <summary>Set a property value for the camera.</summary>
@@ -542,9 +542,9 @@ void Control::SendCamProp(CamProperties prop, bool echo)
 		break;
 	}
 	// format and output the value
-	String s = String("bs") + prefix + (char)prop;
+	String s = String(prefix) + (char)prop;
 	if (echo)
 		debug.println(s.c_str(), v);
 	else
-		Parent->Command(s, v);
+		Parent->Output(s + String(v));
 }

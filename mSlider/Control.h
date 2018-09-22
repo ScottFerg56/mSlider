@@ -27,7 +27,7 @@
 class Control : public Applet
 {
 public:
-	Control() : Timer(500) { }
+	Control(char prefix) : Applet(prefix), Timer(500) { }
 	void		Setup();
 	void		Run();
 	bool		Command(String s);
