@@ -15,22 +15,26 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mSlider", "mSlider\mSlider.
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FMBlue", "..\mLibs\FMBlue\FMBlue.vcxitems", "{1D794E95-E48A-4A64-8D73-6D2A688223ED}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ScaledStepper", "..\mLibs\ScaledStepper\ScaledStepper.vcxitems", "{F0778FF9-7BB2-4054-BD88-3FA4B19D46CF}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FMStepper", "..\mLibs\FMStepper\FMStepper.vcxitems", "{7B0CEBA7-1DF5-497A-8AC6-EBEAFC2C1212}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FMIvalometer", "..\mLibs\FMIvalometer\FMIvalometer.vcxitems", "{DC295D88-31C6-4F74-A5B1-07A0B8D1A886}"
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		..\mLibs\FMBlue\FMBlue.vcxitems*{1d794e95-e48a-4a64-8d73-6d2a688223ed}*SharedItemsImports = 9
 		..\mLibs\Applet\Applet.vcxitems*{2c7ff0e5-2d2e-49c2-b254-37256e5ac7c4}*SharedItemsImports = 9
 		..\mLibs\Metronome\Metronome.vcxitems*{55c67968-8faa-412c-b3ec-84d600211042}*SharedItemsImports = 9
+		..\mLibs\FMStepper\FMStepper.vcxitems*{7b0ceba7-1df5-497a-8ac6-ebeafc2c1212}*SharedItemsImports = 9
 		..\mLibs\FMTime\FMTime.vcxitems*{9b8b219c-28d6-4b09-84ef-67be5feee511}*SharedItemsImports = 9
 		..\mLibs\Applet\Applet.vcxitems*{c5f80730-f44f-4478-bdae-6634efc2ca88}*SharedItemsImports = 4
 		..\mLibs\FMBlue\FMBlue.vcxitems*{c5f80730-f44f-4478-bdae-6634efc2ca88}*SharedItemsImports = 4
 		..\mLibs\FMDebug\FMDebug.vcxitems*{c5f80730-f44f-4478-bdae-6634efc2ca88}*SharedItemsImports = 4
+		..\mLibs\FMIvalometer\FMIvalometer.vcxitems*{c5f80730-f44f-4478-bdae-6634efc2ca88}*SharedItemsImports = 4
+		..\mLibs\FMStepper\FMStepper.vcxitems*{c5f80730-f44f-4478-bdae-6634efc2ca88}*SharedItemsImports = 4
 		..\mLibs\FMTime\FMTime.vcxitems*{c5f80730-f44f-4478-bdae-6634efc2ca88}*SharedItemsImports = 4
 		..\mLibs\Metronome\Metronome.vcxitems*{c5f80730-f44f-4478-bdae-6634efc2ca88}*SharedItemsImports = 4
-		..\mLibs\ScaledStepper\ScaledStepper.vcxitems*{c5f80730-f44f-4478-bdae-6634efc2ca88}*SharedItemsImports = 4
 		..\mLibs\FMDebug\FMDebug.vcxitems*{d5e70b5a-35af-4d51-ba35-5d4700b3d495}*SharedItemsImports = 9
-		..\mLibs\ScaledStepper\ScaledStepper.vcxitems*{f0778ff9-7bb2-4054-bd88-3fa4b19d46cf}*SharedItemsImports = 9
+		..\mLibs\FMIvalometer\FMIvalometer.vcxitems*{dc295d88-31c6-4f74-a5b1-07a0b8d1a886}*SharedItemsImports = 9
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x86 = Debug|x86

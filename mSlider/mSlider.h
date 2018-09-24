@@ -23,14 +23,14 @@
 
 #define LEDpin 13
 
-#define SlideLimitPin	 6
-#define SlideStepPin	 9
-#define SlideDirPin		10
+#define SlideLimit_Pin	 6
+#define SlideStep_Pin	 9
+#define SlideDir_Pin	10
 
-#define PanStepPin		11
-#define PanDirPin		12
+#define PanStep_Pin		11
+#define PanDir_Pin		12
 
-#define FocusPin		18
-#define ShutterPin		19
+#define Focus_Pin		18
+#define Shutter_Pin		19
 
 #endif

@@ -24,12 +24,12 @@
     <ClInclude Include="mSlider.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Control.h">
+    <ClInclude Include="Global.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Control.cpp">
+    <ClCompile Include="Global.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
