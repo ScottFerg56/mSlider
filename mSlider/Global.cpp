@@ -18,7 +18,7 @@
 /// <summary>Set a property value.</summary>
 /// <param name="prop">The property to set.</param>
 /// <param name="v">The value to set.</param>
-bool Global::SetProp(char prop, String v)
+bool Global::SetProp(char prop, const String& v)
 {
 	switch ((Properties)prop)
 	{

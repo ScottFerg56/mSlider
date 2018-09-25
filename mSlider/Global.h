@@ -35,7 +35,7 @@ public:
 	void		Setup() { }
 	void		Run() { }
 	String		GetProp(char prop);
-	bool		SetProp(char prop, String v);
+	bool		SetProp(char prop, const String& v);
 
 	/// <summary>Properties exposed to the communications interface.</summary>
 	/// <remarks>The enum values represent the character codes used in the Input/Output strings.</remarks>
