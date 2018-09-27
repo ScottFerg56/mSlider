@@ -10,7 +10,8 @@
  @@  @@    @@   @@   @@  @@  @@ @@  @@     @@
   @@@ @   @@@@   @@@@@   @@@@@   @@@ @@   @@@@
   
- Author:	Scott Ferguson
+    (c) 2018 Scott Ferguson
+    This code is licensed under MIT license (see LICENSE file for details)
  */
 
 #ifndef _Global_h
@@ -25,6 +26,7 @@
 #include <FMDebug.h>
 #include <Applet.h>
 
+///<summary>An Applet for Global properties exchanged with the Slider controller application.</summary>
 class Global : public Applet
 {
 public:

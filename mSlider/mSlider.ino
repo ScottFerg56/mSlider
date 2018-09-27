@@ -10,7 +10,11 @@
 @@ @ @@ @@   @@    @@      @@   @@  @@  @@   @@  @@
 @@   @@  @@@@@    @@@@    @@@@   @@@ @@  @@@@@  @@@@
 
- Author:	Scott Ferguson
+    (c) 2018 Scott Ferguson
+    This code is licensed under MIT license (see LICENSE file for details)
+
+    An Arduino implementation for a DIY automated camera slider, including pan and intervalometer functions.
+    For more information, visit: https://github.com/ScottFerg56/mSlider/tree/master.
 */
 
 #include "mSlider.h"
