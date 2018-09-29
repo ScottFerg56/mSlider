@@ -22,6 +22,5 @@ Place the mSlider and mLibs projects in sibling subdirectories in your file syst
 The mSlider project has dependencies on several libraries, including the Arduino libraries of course:
 * [**Adafruit nRF51 BLE Library**](https://learn.adafruit.com/adafruit-feather-32u4-bluefruit-le/installing-ble-library)
 * [**AccelStepper library**](http://www.airspayce.com/mikem/arduino/AccelStepper/) - Required by the FMStepper Applet.
-* **Feather M0 Bluefruit LE** - Check with [**Adafruit**](https://learn.adafruit.com/adafruit-feather-m0-bluefruit-le?view=all) for installing support for the board.
 
 The **mSlider** application communicates via Bluetooth LE with a controlling application implemented in the **Slider** companion project one level above. **Slider** provides both Arduino and Windows Universal Windows Platform (UWP) implementations for controlling the Camera Slider hardare.
