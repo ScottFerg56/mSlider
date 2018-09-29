@@ -8,7 +8,7 @@ This project includes software and [plans](https://github.com/ScottFerg56/mSlide
 
 The [**Slider gallery**](https://www.forestmoon.com/Piwigo/index.php?/category/Slider) Shows lots of construction and overview information with details in the captions. 
 
-This project requires other reusable libraries found in the **mLibs** companion project one level above:
+This project requires other reusable libraries found in the **mLibs** companion project:
 * **Applet** - A uniform mechanism for organizing and communicating with hardware components
 * **FMBlue** - An Applet for Bluetooth LE interfacing.
 * **FMDebug** - An Applet for Serial interfacing and debugging enhancements.
@@ -24,4 +24,4 @@ The mSlider project has dependencies on several libraries, including the Arduino
 * [**AccelStepper library**](http://www.airspayce.com/mikem/arduino/AccelStepper/) - Required by the FMStepper Applet.
 * **Feather M0 Bluefruit LE** - Check with [**Adafruit**](https://learn.adafruit.com/adafruit-feather-m0-bluefruit-le?view=all) for installing support for the board.
 
-The **mSlider** application communicates via Bluetooth LE with a controlling application implemented in the **Slider** companion project one level above. **Slider** provides both Arduino and Windows Universal Windows Platform (UWP) implementations for controlling the Camera Slider hardare.
+The **mSlider** application communicates via Bluetooth LE with a controlling application implemented in the **Slider** companion project. **Slider** provides both Arduino and Windows Universal Windows Platform (UWP) implementations for controlling the Camera Slider hardare.
